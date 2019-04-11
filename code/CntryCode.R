@@ -83,7 +83,7 @@ NUTS_code = read_html("files/wikinuts.html") %>%
  select(NUTS=Estado.1 ,Pais=Estado) 
 
 NUTS_code=NUTS_code[nchar(NUTS_code$NUTS)==2,]
-
+ #TEST GITHUB
 
 #b1. Organizations geonames----
 url = paste(
