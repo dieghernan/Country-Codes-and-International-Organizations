@@ -1,6 +1,5 @@
 #0. Cleaning and set-up R----
 rm(list = ls())
-XXXXX = "dieghernan"
 library(pacman)
 p_load(dplyr,
        rvest,
@@ -11,7 +10,8 @@ p_load(dplyr,
 
 
 
-#D. Trade Blocks----
+#A. CIA Factbook----
+#Pretty manual when catching ISO3 codes - commmented by now
 # Factbook
 # Fact =  read_html("files/fact.html")  %>%
 #   html_nodes(xpath = '//*[@id="fieldListing"]') %>%
@@ -86,20 +86,77 @@ for (i in 1:nrow(Fact)) {
   )
   n$org_name = word(n$org, 1, sep = fixed('/'))
   n$org_member = word(n$org, 2, sep = fixed('/'))
-  n = n[, -3]
+  n = n[,-3]
   if (i == 1) {
     Orgs = n
   } else {
     Orgs = rbind(Orgs, n)
   }
-  rm(org, n)
+  rm(org, n, Fact)
 }
 rm(i)
-Orgs$org_name=str_squish(Orgs$org_name)
-Orgs$org_name=gsub(" -","-",gsub("- ","-",Orgs$org_name))
-Orgs$org_name=gsub(" ","_",Orgs$org_name)
+Orgs$org_name = str_squish(Orgs$org_name)
+Orgs$org_name = gsub(" -", "-", gsub("- ", "-", Orgs$org_name))
+Orgs$org_name = gsub(" ", "_", Orgs$org_name)
+Orgs=Orgs[,-1]
+Orgs$source="CIAFactbook"
 
-#Select organisms
+#B. RESTCountries----
+RESTCountries = fromJSON("files/rest.json")
+RESTCountries = RESTCountries[c("alpha2Code", "alpha3Code", "regionalBlocs")]
+RESTCountries$abb = lapply(1:nrow(RESTCountries), function(x)
+  RESTCountries$regionalBlocs[[x]][["acronym"]])
+RESTCountries = RESTCountries[, -3]
+RESTCountries = filter(RESTCountries, !RESTCountries$abb == "NULL")
+for (i in 1:nrow(RESTCountries)) {
+  f = data.frame(RESTCountries[i, 1:2], orgs = RESTCountries[i, 3],stringsAsFactors = F)
+  names(f) = c("ISO_3166_2", "ISO_3166_3", "org_name")
+  if (i == 1) {
+    TBREST = f
+  }
+  else  {
+    TBREST = rbind(TBREST, f)
+  }
+  rm(f)
+}
+rm(i, RESTCountries)
+TBREST$source="RESTCountries"
+#C. geonames----
+geonames_org = fromJSON("files/geoorgs.json") %>% as.data.frame(stringsAsFactors = F)
+geonames_org = geonames_org[c("geonames.toponymName",
+                              "geonames.alternateNames",
+                              "geonames.cc2")]
+names(geonames_org) = c("name", "list", "mem")
+geonames_org = filter(geonames_org, !is.na(geonames_org$mem))
+geonames_org$abb = lapply(1:nrow(geonames_org), function (x)
+  unlist(as.character(geonames_org[x, 2][[1]][["name"]][1])))
+geonames_org$fin = ifelse(nchar(geonames_org$abb) > 10,
+                          geonames_org$name,
+                          geonames_org$abb)
+geonames_org$fin = gsub(" ", "_", geonames_org$fin)
+geonames_org = geonames_org[c("fin", "mem")]
+names(geonames_org)
+for (i in 1:nrow(geonames_org)) {
+  df = data.frame(geonames_org[i, 1], strsplit(geonames_org[i, 2], ","),stringsAsFactors = F)
+  names(df) = c("org_name", "ISO_3166_2")
+  if (i == 1) {
+    GeoOrg = df
+  }
+  else  {
+    GeoOrg = rbind(GeoOrg, df)
+  }
+  rm(df)
+}
+GeoOrg$source="geonames"
+rm(i,geonames_org)
+
+
+#----
+
+
+b=a$list[["name"]][1]
+b[["name"]][1]
+#Select organisms----
 WikiTrade <-  read_html("files/wikitrade.html") %>%
   html_nodes(xpath = '//*[@id="mw-content-text"]/div/table[3]') %>%
   html_table(fill=T) %>%
