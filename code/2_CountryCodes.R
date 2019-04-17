@@ -283,7 +283,7 @@ Clean$pop = Base_code$population.gn
 Clean$area_km2 = Base_code$area_km2
 Clean$Developed = Base_code$Developed
 rm(df)
-write.csv(Clean,"outputs/Countrycodes.csv")
-write.csv(Clean,paste("outputs/Countrycodes_",Sys.Date(),".csv",sep = ""))
-rm(list = ls())
+write.csv(Clean,"outputs/Countrycodes.csv",row.names=FALSE)
+write.csv(Clean,paste("outputs/bk/Countrycodes_",Sys.Date(),".csv",sep = ""),row.names=FALSE)
+#rm(list = ls())
 

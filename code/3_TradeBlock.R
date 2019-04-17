@@ -9,14 +9,14 @@ p_load(dplyr,
 
 
 
-
 #A. CIA Factbook----
 #Pretty manual when catching ISO3 codes - commmented by now
-# Factbook
+# 
 # Fact =  read_html("files/fact.html")  %>%
 #   html_nodes(xpath = '//*[@id="fieldListing"]') %>%
 #   html_table() %>% as.data.frame(stringsAsFactors = F, fix.empty.names =T)
-#
+# 
+# 
 # ISOFACT=left_join(Fact,Clean[c("ISO_3166_3","NAME.EN")],by=c("Country"="NAME.EN"))
 # FactKeep=ISOFACT[!is.na(ISOFACT$ISO_3166_3),]
 # ISOleft1=ISOFACT[is.na(ISOFACT$ISO_3166_3),-3]
@@ -44,7 +44,7 @@ p_load(dplyr,
 #                                by=c("Country"="name.en.uc"),
 #                                max_dist=4
 #                                )
-#
+# 
 # ISOleft2[ISOleft2=="character(0)"]<- ""
 # ISOleft2$candfin1=as.character(ifelse(!nchar(ISOleft2$cand)==3,"",ISOleft2$cand))
 # ISOleft2$candfin2=as.character(ifelse(!nchar(ISOleft2$cand2)==3,"",ISOleft2$cand2))
@@ -64,11 +64,11 @@ p_load(dplyr,
 # rm(FactKeep,ISOFACT,ISOkeep2,ISOleft3,ISOSearch2,ISOSearch3)
 # #Write csv
 # rownames(Fact)=1:nrow(Fact)
-#write.csv(Fact,"outputs/CIAFactbookOrgISO.csv")
+# write.csv(Fact,"outputs/bk/CIAFactbookOrgISO.csv",row.names = FALSE)
+
 #Load
 Fact = read.csv(
-  "outputs/CIAFactbookOrgISO.csv",
-  row.names = "X",
+  "outputs/bk/CIAFactbookOrgISO.csv",
   stringsAsFactors = F
 )
 Fact$International.organization.participation = str_squish(gsub(
@@ -92,14 +92,19 @@ for (i in 1:nrow(Fact)) {
   } else {
     Orgs = rbind(Orgs, n)
   }
-  rm(org, n, Fact)
+  rm(org, n)
 }
-rm(i)
+rm(i,Fact)
 Orgs$org_name = str_squish(Orgs$org_name)
 Orgs$org_name = gsub(" -", "-", gsub("- ", "-", Orgs$org_name))
 Orgs$org_name = gsub(" ", "_", Orgs$org_name)
 Orgs=Orgs[,-1]
+Orgs$org_member=ifelse(is.na(Orgs$org_member),"member",Orgs$org_member)
+Orgs[Orgs == ""] <- NA
+Orgs$org_name=ifelse(Orgs$org_name=="Australian_Group","Australia_Group",Orgs$org_name)
 Orgs$source="CIAFactbook"
+Orgs = Orgs %>% filter(!org_name=="Commonwealth_of_Nations")
+Orgs$org_name=toupper(Orgs$org_name)
 
 #B. RESTCountries----
 RESTCountries = fromJSON("files/rest.json")
@@ -120,7 +125,14 @@ for (i in 1:nrow(RESTCountries)) {
   rm(f)
 }
 rm(i, RESTCountries)
+TBREST$org_member="member"
 TBREST$source="RESTCountries"
+TBREST[TBREST == ""] <- NA
+TBREST$org_name=toupper(TBREST$org_name)
+Alinfacts=sort(unique(Orgs$org_name))
+TBREST=filter(TBREST,!TBREST$org_name %in% Alinfacts)
+
+
 #C. geonames----
 geonames_org = fromJSON("files/geoorgs.json") %>% as.data.frame(stringsAsFactors = F)
 geonames_org = geonames_org[c("geonames.toponymName",
@@ -147,8 +159,97 @@ for (i in 1:nrow(geonames_org)) {
   }
   rm(df)
 }
+GeoOrg$org_member="member"
 GeoOrg$source="geonames"
+GeoOrg[GeoOrg == ""] <- NA
 rm(i,geonames_org)
+GeoOrg$org_name=toupper(GeoOrg$org_name)
+Alinfactrest=sort(unique(append(Alinfacts,TBREST$org_name)))
+GeoOrg=filter(GeoOrg,!GeoOrg$org_name %in% Alinfacts)
+
+#D. Custom----
+ISOs<-read.csv("outputs/CountryCodes.csv",stringsAsFactors = F) %>% select(
+  ISO_3166_2,
+  ISO_3166_3,
+  currency
+)
+
+#Select EZone
+Custom <- ISOs %>% 
+  filter(currency=="EUR")  %>% select(
+    ISO_3166_2,
+    ISO_3166_3)
+EU=Orgs %>% filter(org_name=="EU") %>% select(ISO_3166_3)
+Custom =filter(Custom,Custom$ISO_3166_3 %in% EU$ISO_3166_3)
+Custom$org_name="EuroArea"
+Custom$org_member="member"
+Custom$source="custom"
+
+
+#E. Joins----
+ISOs=ISOs %>% select(ISO_3166_2,ISO_3166_3)
+OrgName=sort(unique(Orgs$org_name))
+OrgName=sort(unique(append(OrgName,TBREST$org_name)))
+OrgName=sort(unique(append(OrgName,Custom$org_name)))
+OrgName=as.data.frame(sort(unique(append(OrgName,GeoOrg$org_name))),stringsAsFactors=F)
+#Custom
+names(OrgName)="org_name"
+for (i in 1:nrow(ISOs)){
+  a=cbind(ISOs[i,1:2],OrgName,stringsAsFactors=F)
+  if (i==1){
+    IsoOrgs=a
+  } else {
+    IsoOrgs=rbind(IsoOrgs,a,stringsAsFactors=F)
+  }
+  rm(a)
+}
+rm(OrgName)
+#CIAFact
+factfin= IsoOrgs %>% filter(org_name %in% Orgs$org_name) %>% left_join(Orgs)
+RESTfin= IsoOrgs %>% filter(org_name %in% TBREST$org_name) %>% left_join(TBREST)
+Geofin=  IsoOrgs %>% filter(org_name %in% GeoOrg$org_name) %>% left_join(GeoOrg)
+CustomFin=IsoOrgs %>% filter(org_name %in% Custom$org_name) %>% left_join(Custom)
+sf=rbind(rbind(rbind(factfin,RESTfin),Geofin),CustomFin)
+#Clean dup - manual
+f=sf %>% count(ISO_3166_2,org_name) %>% filter(n>1) %>% left_join(sf)
+f=f[1,]
+sf=left_join(sf,f) %>% filter(is.na(n)) 
+sf=sf[,-ncol(sf)]
+sf$org_member=ifelse(is.na(sf$org_member),"no",sf$org_member)
+sf = sf %>% arrange(ISO_3166_3,org_name)
+
+# Put in vector,
+df=sf[1,1:2]
+org=filter(sf,sf$ISO_3166_2 ==df[1,1])
+df$orgs <-list(org$org_name)
+df$memb <-list(org$org_member)
+df$index=df$orgs[1][[1]]=="EU"
+sapply(list, function)
+bb=df$orgs
+mm=df$memb
+c=bb[[1]]=="EU"
+mm[[max(c*1:lengths(bb))]]
+mm[[1]][max(c*1:lengths(bb))]
+
+sfout= sf %>% filter(ISO_3166_2=="SO" & org_name=="OPCW" & org_member=="signatory")
+ff=subset(sf, !ISO_3166_2=="SO" & !org_name=="OPCW")
+
+df2=inner_join()
+
+source2=filter(TBREST,!TBREST$org_name %in% Orgs$org_name)
+df=left_join(df,source2,by=c("ISO_3166_2","org_name"))
+
+
+source3=filter(GeoOrg,!GeoOrg$org_name %in% df$org_name)
+
+"Commonwealth_of_Nations" %in% df$org_name
+
+%>% left_join(TBREST) %>% left_join(GeoOrg)
+df=left_join(TBREST)
+df=data.frame("ISO_3166_2"= ISOs$ISO_3166_2,OrgName)
+appe
+GeoOrg=left_join(GeoOrg,ISOs)
+Orgs=left_join(Orgs,ISOs)
 
 
 #----
