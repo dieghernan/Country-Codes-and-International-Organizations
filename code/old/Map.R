@@ -4,19 +4,216 @@ library(pacman)
 
 p_load(sf,
        rnaturalearth,
-       dplyr,lwgeom)
+       dplyr)
 
-f=paste(tempdir(),"a.zip",sep="/")
-        
-        
-download.file("https://ec.europa.eu/eurostat/cache/GISCO/distribution/v2/countries/shp/CNTR_RG_60M_2016_4326.shp.zip",
-              f)
-unzip(f,exdir=tempdir())
-map=st_read(paste(tempdir(),"CNTR_RG_60M_2016_4326.shp",sep="/"))
-rm(f)
+clon=20
+clat=-10
+ortho = paste("+proj=ortho +lon_0=",clon," +lat_0=",clat,sep = "")
+
+
+cntry=ne_countries(110,"countries",returnclass = "sf")
+
+
+Rad=6000000
+x=sin(seq(0,pi/180*365,0.1))*Rad
+y=cos(seq(0,pi/180*365,0.1))*Rad
+mpoint=st_multipoint(cbind(x,y)) %>% st_sfc(crs=ortho)
+munproj=st_transform(mpoint,4326)
+st_coordinates(mpoint)
+plot(st_geometry(cntry))
+plot(munproj,add=T)
+mline=st_cast(munproj,"LINESTRING") 
+mpol=st_cast(mline,"POLYGON")
+plot(st_geometry(cntry))
+plot(mline,add=T)
+plot(mpol)
+c=st_convex_hull(mpol)
+plot(c,col="red")
+c2=st_intersection(cntry,c)
+
+cntry2=st_buffer(cntry,0.00001)
+crop=st_intersection(cntry,mline)
+
+plot(st_geometry(c2))
+c3=st_transform(c2,ortho)
+
+
+
+plot(st_geometry(c3))
+
+
+
+
+plot(st_geometry(crop))
+plot(st_)
+sin(90*pi/180)
+pi/180*360
+
+clon=-20
+clat=10
+lon=10
+lat=20
+d2r     <- pi / 180
+crs = paste("+proj=ortho +lon_0=",clon," +lat_0=",clat,sep = "")
+checkpoint=st_point(c(lon,lat)) %>% st_sfc(crs=4326) %>% st_sf(Test=1) %>% st_transform(crs=crs)
+cd=st_coordinates(checkpoint) %>% as.data.frame()
+cd$newx=cos(lat*d2r) * sin(lon*d2r - clon*d2r)
+Rad=cd$X/cd$newx
+cd$newy=Rad*(cos(clat*d2r) * sin(lat*d2r) - sin(clat*d2r) * cos(lat*d2r) * cos(lon*d2r - clon*d2r))
+cd$angle=atan2(cd$Y,cd$X)*180/pi
+cd$angle
+
+center=c(clon,clat) %>% st_point() %>% st_sfc(crs=4326) %>% st_sf(Test=0) %>% st_transform(crs)
+dfin=rbind(center,checkpoint)
+  plot(dfin[0],axes=T)
+plot(checkpoint,axes=T)
+
+xnew=Rad*sin(cd$angle)
+ynew=Rad*cos(cd$angle)
+
+
+
+atan(4/3)+180
+
+
+atan(4/3)*180/pi 
+
+
+atan2(4,3)*180/pi
+4/3
+pi/2
+
+dot = x1*x2 + y1*y2      # dot product
+det = x1*y2 - y1*x2      # determinant
+angle = atan2(det, dot)  # atan2(y, x) or atan2(sin, cos)
+
+cd$newx=cos(lat*d2r) * sin(lon*d2r - clon*d2r)
+
+
+cntry=ne_countries(110,"countries",returnclass = "sf")
+
+
+
+
+plot(st_geometry(st_transform(cntry,crs)))
+dd=cntry %>% st_cast("POLYGON") %>% st_transform(crs) %>% st_buffer(0)
+dd2=st_intersection(dd,sphere_g)
+plot(st_geometry(dd))
+plot(sphere_g,add=T)
+plot(st_geometry(dd2))
+
+crop=st_intersection(cnntry_a,sphere_g)
+plot(st_geometry(crop))
+sphere_g <- st_graticule(
+  lon = seq(-180, 180, 2),
+  lat = seq(-89, 89, 2),
+  ndiscr = 1000, margin = 10e-6) %>%
+  st_transform(crs = crs) %>%
+  st_convex_hull() %>% st_buffer(0) %>% st_combine() %>%st_union()
+
+a=st_coordinates(sphere_g) %>% as.data.frame()
+b=st_transform(sphere_g,4326) %>% st_buffer(0)
+plot(st_geometry(cntry))
+plot(b,add=T)
+c=st_intersection(cntry,b)
+plot(st_geometry(c))
+c2=st_transform(c,crs)
+plot(st_geometry(c2))
+st_bbox(sphere_g)
+plot(sphere_g)
+sphere_unproj=sphere_g %>% st_transform(4326) %>% st_buffer(1) %>% st_combine() %>% st_union()
+plot(sphere_unproj)
+st_bbox(sphere_unproj)
+rad=6378137
+x=rad*sin(seq(0,361,0.5))
+y=rad*cos(seq(0,361,0.5))
+f=cbind(x,y)
+c=st_sf(a=1,st_sfc(st_multipoint(f)))
+c2=st_cast(c,"LINESTRING") 
+plot(c2,axes=T)
+%>% st_buffer(0) %>% st_union() 
+st_crs(c2)=crs
+st_crs(c2)
+plot(c2    ,axes=T)1
+c2=st_transform(c2,4326)
+plot(c2)
+st_bbox(c)
+f=st_multilinestring(list(f))
+st_as_sf(st_multipoint(f))
+f2=st_sf(1,f)
+f3=st_polygon(f)
+st_bbox(f)
+plot(f)
+f2=st_cast(f,"LINESTRING")
+s=st_multipolygon(f2)
+plot(f2)
+sphere_ort <- st_graticule(
+  lon = seq(-180, 180, 2),
+  lat = seq(-89, 89, 2),
+  ndiscr = 1000, margin = 10e-6) %>%
+  st_transform(crs = crs) %>%
+  st_convex_hull() 
+cntry=ne_countries(110,"countries",returnclass = "sf")
+cntry_dis=st_cast(cntry,"POLYGON")
+
+a=sphere_ort %>% st_buffer(100) %>% st_union() %>% st_geometry()
+
+map2=st_transform(cntry_dis,crs=crs)
+plot(st_geometry(map2))
+b=st_make_valid(map2)
+plot(st_geometry(b))
+c=st_intersection(b,a)
+plot(st_geometry(c))
+plot(a,add=T,lwd=3)
+st_sn
+dd=st_snap(c,a,tol=30000)
+plot(st_geometry(dd))
+bb=st_nearest_points(c,a)
+plot(bb)
+cntry2=st_cast(cntry,"POLYGON")
+a=st_coordinates(cntry2[1,])
+a
+plot(a)
+b=st_polygon(a)
+cntry3=st_cast(cntry2,"MULTILINESTRING",group_or_split=T)
+st_geometry(cntry2)
+coord=st_coordinates(st_geometry(cntry2)) %>% as.data.frame()
+
+
+
+
+st_bbox(cntry)
+point=st_sfc(st_point(c(-60,-40)))
+st_crs(point)=4326
+plot(st_geometry(cntry))
+plot(point,col="red",cex=7,add=T)
+
+p2=st_transform(point,crs="+proj=ortho +lon_0=0 +lat_0=0")
+
+Rad=6378137
+d2r     <- pi / 180
+cenlong=0*d2r
+cenlat=0*d2r
+long=-60*d2r
+lat=-40*d2r
+
+x     <- Rad*(cos(lat) * sin(long - cenlong))
+y     <- Rad*(cos(cenlat) * sin(lat) - sin(cenlat) * cos(lat) * cos(long - cenlong))
+front <- sin(cenlat) * sin(lat) + cos(cenlat) * cos(lat) * cos(long-cenlong) > 0
+
+c(x,y)
+st_coordinates(p2)
+#back
+rho=sqrt(x^2+y^2)
+c=asin(rho/Rad)
+
+latreg=asin(cos(c)*sin(cenlat)+y*sin(c)*cos(cenlat)/rho)/d2r
+longreg=(cenlong+atan(x*sin(c)/(rho*cos(c)*cos(cenlat)-y*sin(c)*sin(cenlat))))/d2r
+
+map=ne_countries(50,"countries",returnclass = "sf")
 #Orthomap----
 #crs = "+proj=ortho +lon_0=-70 +lat_0=-15"
-crs = "+proj=ortho +lon_0=-100 +lat_0=30"
+crs = "+proj=ortho +lon_0=0 +lat_0=0"
 sphere_ort <- st_graticule(
   lon = seq(-180, 180, 2),
   lat = seq(-89, 89, 2),
@@ -30,8 +227,10 @@ sphere = st_transform(sphere_ort,
   st_buffer(3) %>%
   st_combine() %>%
   st_union() 
+
 map=st_transform(map,4326)
-sphere=st_crop(sphere,st_bbox(map))
+plot(st_geometry(map))
+plot(sphere,add=T)
 map_dis=st_cast(map,"POLYGON")
 map_crop=st_intersection(map_dis,sphere)
 grat=st_geometry(st_graticule(lon=seq(-180,180,30),lat=seq(-90,90,30))) 
