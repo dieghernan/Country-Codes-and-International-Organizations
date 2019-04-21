@@ -6,33 +6,287 @@ p_load(sf,
        rnaturalearth,
        dplyr)
 
-clon=20
-clat=-10
+#Inputs
+st_orthoproj <- function(sf, xinit, yinit) {
+  oldw <- getOption("warn")
+  options(warn = -1)
+  #Arrange map
+  sfinit = sf
+  clon = xinit
+  #This minimize an error when cropping
+  if (yinit == 0) {
+    clat = 0.001
+  } else {
+    clat = yinit
+  }
+  crs.out = paste("+proj=ortho +lon_0=", clon, " +lat_0=", clat, sep = "")
+  
+  #Border Projected map
+  R = 6378137 #Earth radius as per the internal maths
+  x = R * sin(seq(0, 2 * pi, length.out = 1000))
+  y = R * cos(seq(0, 2 * pi, length.out = 1000))
+  border = cbind(x, y) %>%
+    st_multipoint() %>%
+    st_sfc(crs = crs.out) %>%
+    st_cast("POINT") %>%
+    st_sf(ind_ring = 1:length(x))
+  
+  #Prepare cut
+  border_un = st_transform(border, 4326) %>% st_geometry()
+  coord = st_coordinates(border_un) %>% as.data.frame() %>% arrange(X, Y)
+  bbox = st_bbox(border_un)
+  #Complete polygon
+  if (clat > 0) {
+    a1 = bbox["ymax"]
+    a2 = 90
+    
+  } else {
+    a1 = bbox["ymin"]
+    a2 = -90
+  }
+  newdots = data.frame(X = bbox["xmax"], Y = a1)
+  newdots = rbind(newdots, c(bbox["xmax"], a2))
+  newdots = rbind(newdots, c(bbox["xmin"], a2))
+  newdots = rbind(newdots, c(bbox["xmin"], a1))
+  coord2 = rbind(coord, newdots)
+  pol = as.matrix(coord2) %>% st_linestring() %>% st_cast("POLYGON") %>% st_sfc()
+  st_crs(pol) = 4326
+    sfcrop = st_intersection(sfinit, pol)
+  plot(pol,col="red")
+  plot(st_geometry(sfcrop),add=T)
+  #Orthogonal projection
+  sfproj = sfcrop %>% st_transform(crs.out)
+  #Fix errors
+  ptr = st_buffer(sfproj[!is.na(st_is_valid(sfproj)),], 0.0)
+  options(warn = oldw)
+  return(ptr)
+}
+cntry = ne_countries(110, "countries", returnclass = "sf")
+a2=st_orthoproj(cntry,-90,50)
+
+#Border
+orthoborder=cbind(6378137 * sin(seq(0, 2 * pi, length.out = 1000)),
+         6378137 * cos(seq(0, 2 * pi, length.out = 1000))) %>% 
+  st_linestring() %>% st_sfc() %>% st_cast("POLYGON")
+st_crs(orthoborder)=st_crs(a2)
+
+#Grid
+grid=st_graticule(lon=seq(-180,180,30),lat=seq(-90,90,30),ndiscr=1000, margin = 10e-9) %>% 
+  st_transform(st_crs(a2)) 
+grid=grid[as.integer(st_length(grid))>0,]
+plot(st_geometry(grid))
+gride=filter(grid,grid$type=="E")
+gridn=filter(grid,grid$type=="N")
+for (i in 1:nrow(gridn)){
+  a=gridn[i,]
+  c=st_coordinates(a) %>% 
+    as.data.frame() %>% 
+    arrange(X) %>% 
+    as.matrix()%>% 
+    st_linestring() %>% 
+    st_sfc()
+  fin=st_sf(st_drop_geometry(a),geometry=c)
+  if (i==1){
+    gridn_arr=fin
+  } else {
+    gridn_arr=rbind(gridn_arr,fin)
+  }
+}
+plot(st_geometry(gridn_arr))
+st_crs(gridn_arr)=st_crs(gride)
+grid_arr=rbind(gride,gridn_arr)
+plot(st_geometry(grid_arr))
+
+
+
+
+
+
+plot(st_geometry(gride))
+st_gr
+plot(grid[1:16,0])
+grid=st_sf(n=1:length(grid),grid)
+grid$l=as.integer(st_length(grid))
+a=grid[16,] %>% st_coordinates() %>% as.data.frame()
+ap=a %>% arrange(X)
+a2=st_linestring(as.matrix(a))
+ap2=st_linestring(as.matrix(a))
+plot(a2)
+
+st_length(grid)
+length(grid)
+plot(fin)
+plot(grid)
+c=grid %>% st_cast("POLYGON") %>% st_combine()
+c2=st_orthoproj(c,-90,50)
+plot(c)
+
+st_is_valid(c)
+plot(grid,add=T)
+plot(st_geometry(a2),add=T)
+a=st_transform(grid,4326)
+plot(a)
+
+
+
+plot(c)
+a3=st_transform(a2,"+proj=ortho")
+
+plot(st_geometry(a3))
+
+
+borderplot=st_coordinates(border) %>% st_linestring() %>% st_sfc()
+st_crs(borderplot)=ortho
+plot(borderplot,axes=T)
+plot(st_geometry(ptr),add=T)
+
+
+
+
+
+
+st_crs(pol)
+summary(pol2)
+st_sfc
+pol2=st_sfc(pol,4326)
+
+
+st_crs(pol)=4326
+crop=st_intersection()
+
+
+
+clon=0
+clat=0
 ortho = paste("+proj=ortho +lon_0=",clon," +lat_0=",clat,sep = "")
+cntry=ne_countries(110,"countries",returnclass = "sf")
+plot(st_geometry(st_transform(cntry,ortho)))
+
+
+testpoint=rbind(c(10,30),c(160,-70),c(0,0),c(-20,-10))
+testpoint=st_multipoint(testpoint) %>% st_sfc(crs=4326) %>% st_cast("POINT")
+t2=st_transform(testpoint,ortho)
+plot(t2,add=T,cex=5,col="blue")
+
+coord=st_coordinates(testpoint) %>% as.data.frame()
+coord2=st_coordinates(t2) %>% as.data.frame()
+coord=cbind(coord,coord2)
+names(coord)=c("alpha","beta","x","y")
+
+#Maths
+d2r     <- pi / 180
+R=6378137
+coord$newx=R*(cos(coord$beta*d2r) * sin(coord$alpha*d2r - clon*d2r))
+coord$x/coord$newx
+coord$newy=R*(cos(clat*d2r) * sin(coord$beta*d2r) - sin(clat*d2r) * cos(coord$beta*d2r) * cos(coord$alpha*d2r - clon*d2r))
+coord$front=sin(clat*d2r)* sin(coord$beta*d2r)+cos(clat*d2r)* cos(coord$beta*d2r)* cos(coord$alpha*d2r - clon*d2r)
+cos(asin(sqrt(coord$x^2+coord$y^2)/R))
+
+#Border Map
+x=R*sin(seq(0,2*pi,length.out = 1000))
+y=R*cos(seq(0,2*pi,length.out = 1000))
+length(x)
+border=cbind(x,y) %>% st_multipoint() %>% st_sfc(crs=ortho) %>% st_cast("POINT") %>% st_sf(ind_ring=1:length(x)                                                                                         )
+border.c=st_coordinates(border) %>% as.data.frame()
+border.c$check=cos(asin(sqrt(border.c$X^2+border.c$Y^2)/R))
+
+#Arrange map
+clon=-5
+clat=-1
+ortho = paste("+proj=ortho +lon_0=",clon," +lat_0=",clat,sep = "")
+
+#Border Map
+x=R*sin(seq(0,2*pi,length.out = 1000))
+y=R*cos(seq(0,2*pi,length.out = 1000))
+border=cbind(x,y) %>% 
+  st_multipoint() %>% 
+  st_sfc(crs=ortho) %>% 
+  st_cast("POINT") %>% 
+  st_sf(ind_ring=1:length(x))                                   
+border_un=st_transform(border,st_crs(sfinit)) %>% st_geometry()
+
 
 
 cntry=ne_countries(110,"countries",returnclass = "sf")
 
+sfinit=cntry
+sfinit$ind=1:nrow(sfinit)
+sfinit_dis=st_cast(sfinit,"POLYGON")
+sfinit_dis$ind_dis=1:nrow(sfinit_dis)
+sfinit_dis=sfinit_dis[,c("ind","ind_dis")]
+sfinit_dis=st_cast(sfinit_dis,"POINT")
+sfinit_dis$ipoint=1:nrow(sfinit_dis)
+sfinit_dis=cbind(sfinit_dis,st_coordinates(sfinit_dis))
+#Identify points on the back
+d2r     <- pi / 180
+R=6378137
+sfinit_dis$front=sin(clat*d2r)* sin(sfinit_dis$Y*d2r)+cos(clat*d2r)* cos(sfinit_dis$Y*d2r)* cos(sfinit_dis$X*d2r - clon*d2r)
+back=filter(sfinit_dis,sfinit_dis$front<0)
+front=filter(sfinit_dis,sfinit_dis$front>=0)
+plot(st_geometry(sfinit))
+plot(st_geometry(back),add=T,col="red")
+plot(st_geometry(front),add=T,col="green")
+del=st_transform(border,st_crs(sfinit)) %>% st_geometry()
+del
 
-Rad=6000000
-x=sin(seq(0,pi/180*365,0.1))*Rad
-y=cos(seq(0,pi/180*365,0.1))*Rad
+del2=del %>% st_coordinates() %>% st_linestring()
+dd2=st_coordinates(del) %>% as.data.frame() %>% arrange(X,Y) %>% as.matrix()
+is.matrix(dd2)
+f=st_linestring(dd2) %>% st_sfc(crs=4326)
+plot(f,add=T,col="pink")
+
+a=st_intersection(sfinit,f)
+plot(st_geometry(a))
+
+  st_intersection(sfinit)
+plot(f)
+plot(del,add=T,col="orange")
+st_bbox(del)
+dis=st_cast(cntry,"POLYGON")
+dis$index=1:nrow(dis)
+disend=dis["index"]
+
+sphere_g <- st_graticule(
+  lon = seq(-180, 180, 2),
+  lat = seq(-89, 89, 2),
+  ndiscr = 1000, margin = 10e-6) %>%
+  st_transform(crs = ortho) %>%
+  st_convex_hull() %>% st_buffer(100) %>% st_combine() %>%st_union() %>% st_geometry()
+
+plot(sphere_g)
+cnt2=st_cast(cntry,"POLYGON")
+cnt=st_transform(cnt2,ortho) %>% st_geometry() %>% st_buffer(0)
+plot(cnt)
+c2=st_intersection(cnt,sphere_g)
+plot(c2)
+
+
+c3=st_transform(c2,4326)
+plot(c3)
+disendt=st_transform(disend,ortho)
+plot(st_geometry(disendt),add=T)
+
+Rad=6370000
+x=sin(seq(0,pi/180*365,0.05))*Rad
+y=cos(seq(0,pi/180*365,0.05))*Rad
 mpoint=st_multipoint(cbind(x,y)) %>% st_sfc(crs=ortho)
 munproj=st_transform(mpoint,4326)
 st_coordinates(mpoint)
 plot(st_geometry(cntry))
 plot(munproj,add=T)
-mline=st_cast(munproj,"LINESTRING") 
+plot(munproj)
+mline=st_cast(munproj,"MULTILINESTRING") 
 mpol=st_cast(mline,"POLYGON")
 plot(st_geometry(cntry))
+c=st_cast(mline,"LINESTRING")
 plot(mline,add=T)
+st_cast()
+
 plot(mpol)
 c=st_convex_hull(mpol)
 plot(c,col="red")
 c2=st_intersection(cntry,c)
 
-cntry2=st_buffer(cntry,0.00001)
-crop=st_intersection(cntry,mline)
 
 plot(st_geometry(c2))
 c3=st_transform(c2,ortho)
@@ -40,9 +294,9 @@ c3=st_transform(c2,ortho)
 
 
 plot(st_geometry(c3))
-
-
-
+dis=st_cast(cntry,"POLYGON")
+dis2=st_transform(dis,ortho) %>% st_geometry()
+plot(dis2)
 
 plot(st_geometry(crop))
 plot(st_)
