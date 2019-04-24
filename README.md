@@ -12,7 +12,7 @@ Three different files are provided:
 
 
 
-#### A.Country Codes `.csv`  <a name="ccodes"></a>
+#### A. Country Codes `.csv`  <a name="ccodes"></a>
 
 Main [`.csv` file](outputs/Countrycodes.csv) containing 
 * Country and regional codes
@@ -47,7 +47,7 @@ ISO_3166_3.sov|Sovereign code |Wikipedia, Statoids | If non-independent
 
 
 
-#### B.International Organizations `.csv`  <a name="ocodes"></a>
+#### B. International Organizations `.csv`  <a name="ocodes"></a>
 
 A single [`.csv` file](outputs/CountrycodesOrgs.csv) describing the membership status of each country across 186 international organizations.
 Field | Description
@@ -62,7 +62,7 @@ org_member | Membership status
 
 
 
-#### C.Full json file `.json`  <a name="jcodes"></a>
+#### C. Full json file `.json`  <a name="jcodes"></a>
 This [`.json` file](outputs/Countrycodesfull.json) combines the previous files:
 
 **Example**
