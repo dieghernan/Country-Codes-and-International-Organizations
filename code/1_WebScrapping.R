@@ -18,11 +18,6 @@ download.file(url, "files/ISOWiki.html")
 url = "https://es.wikipedia.org/wiki/Nomenclatura_de_las_Unidades_Territoriales_Estad%C3%ADsticas"
 download.file(url, "files/wikinuts.html")
 
-url = "https://en.wikipedia.org/wiki/Eurozone"
-download.file(url, "files/wikieurozone.html")
-
-url = "https://en.wikipedia.org/wiki/Trade_bloc"
-download.file(url, "files/wikitrade.html")
 
 #a3. UN----
 download.file("https://unstats.un.org/unsd/methodology/m49/overview/",
@@ -53,6 +48,16 @@ download.file(
   "https://www.cia.gov/-library/publications/the-world-factbook/fields/317.html",
   "files/fact.html"
 )
+
+download.file(
+  "https://www.cia.gov/library/publications/resources/the-world-factbook/appendix/appendix-d.html",
+  "files/fact_codes.html"
+  )
+
+url="https://www.cia.gov/-library/publications/the-world-factbook/appendix/appendix-b.html"
+download.file(url,
+              "files/FactAppB.html")
+
 #a7. Unicode Languages----
 download.file(
   "https://raw.githubusercontent.com/unicode-cldr/cldr-localenames-modern/master/main/en/territories.json",
@@ -67,4 +72,3 @@ url = "http://www.statoids.com/wab.html"
 download.file(url,
               "files/statoids.html")
 rm(list = ls())
-
