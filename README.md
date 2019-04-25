@@ -109,7 +109,7 @@ This [`.json` file](outputs/Countrycodesfull.json) combines the previous files:
   /...
 ]
 ```
-A complementary function (intended to be used in `R`) has been developed:
+A complementary function (intended to be used in **R**) has been developed:
 ```r
 ISO_memcol = function(df, #Input dataframe
                       orgtosearch #org id
