@@ -123,8 +123,12 @@ ISO_memcol = function(df, #Input dataframe
 }
 ```
 #### D. Data sources  <a name="data"></a>
-a. Wikipedia, the free encyclopedia
+* Wikipedia, the free encyclopedia
   * https://en.wikipedia.org/wiki/ISO_3166-1
   * https://es.wikipedia.org/wiki/Nomenclatura_de_las_Unidades_Territoriales_Estad%C3%ADsticas
-b.   
-  *
+* The World Factbook - CIA https://www.cia.gov/library/publications/the-world-factbook/index.html 
+* United Nations Statistical Division https://unstats.un.org/unsd/methodology/m49/overview/
+* geonames https://www.geonames.org/
+* REST COUNTRIES https://restcountries.eu/
+* Unicode Common Locale Data Repository (CLDR) Project https://github.com/unicode-cldr
+* http://www.statoids.com/
