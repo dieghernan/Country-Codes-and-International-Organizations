@@ -293,6 +293,12 @@ ISOs = ISOfull %>% select(ISO_3166_2, ISO_3166_3) %>% arrange(ISO_3166_2) %>%
 
 allOrgs=read.csv("outputs/CountrycodesOrgs.csv",
                  stringsAsFactors = F)
+                             
+#Fix Namibia
+allOrgs$ISO_3166_2=ifelse(allOrgs$ISO_3166_3=="NAM",
+                          "NA",
+                          allOrgs$ISO_3166_2)
+                             
 OrgFull = allOrgs %>% distinct(org_id) %>% arrange(org_id)
 
 alld = do.call("rbind", lapply(1:nrow(ISOs), function(x)
