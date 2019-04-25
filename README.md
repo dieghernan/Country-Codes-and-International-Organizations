@@ -6,6 +6,7 @@ Complete database of countries and territories, their different country codes un
 * [A. Country codes ](#ccodes)
 * [B. International Organizations](#ocodes)
 * [C. Full json file](#jcodes)
+* [D. Data sources](#data)
 
 ### Databases
 Three different files are provided:
@@ -121,3 +122,9 @@ ISO_memcol = function(df, #Input dataframe
   return(df2)
 }
 ```
+#### D. Data sources  <a name="data"></a>
+a. Wikipedia, the free encyclopedia
+  * https://en.wikipedia.org/wiki/ISO_3166-1
+  * https://es.wikipedia.org/wiki/Nomenclatura_de_las_Unidades_Territoriales_Estad%C3%ADsticas
+b.   
+  *
