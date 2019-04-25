@@ -327,6 +327,12 @@ Clean = Clean %>% filter(del == F)
 Clean = Clean[, names(Clean) != "del"]
 
 rm(df)
+
+#Blank as ""
+
+Clean[is.na(Clean)]<-""
+
+
 write.csv(Clean, "outputs/Countrycodes.csv", row.names = FALSE)
 write.csv(Clean,
           paste("outputs/bk/Countrycodes_", Sys.Date(), ".csv", sep = ""),
@@ -354,7 +360,8 @@ FINCIA = FINCIA %>% select(NAME = Country,
                            FIPS_GEC,
                            STANAG,
                            Orgs = International.organization.participation)
-FINCIA[FINCIA == ""] <- NA
+FINCIA[is.na(FINCIA)]<- ""
+
 write.csv(FINCIA, "outputs/bk/FactOrgs.csv", row.names = FALSE)
 
 

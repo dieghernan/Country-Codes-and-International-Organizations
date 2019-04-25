@@ -8,11 +8,9 @@ p_load(dplyr,
        fuzzyjoin)
 #Import ISO relationship
 ISOfull = read.csv("outputs/CountryCodes.csv",
-                   stringsAsFactors = F)
-#Fix Namibia
-ISOfull$ISO_3166_2=ifelse(ISOfull$ISO_3166_3=="NAM",
-                          "NA",
-                          ISOfull$ISO_3166_2)
+                   stringsAsFactors = F,
+                   na.strings = "")
+
 
 #Preprocess: Orgs and Abb----
 OrgWeb <-  read_html("files/FactAppB.html") %>% 
@@ -53,10 +51,8 @@ finorg = finorg %>%
 #A. CIA Factbook----
 #Load
 Fact = read.csv("outputs/bk/FactOrgs.csv",
-                stringsAsFactors = F)
-#Fix Namibia
-Fact$ISO_3166_2[is.na(Fact$ISO_3166_2)] <- "NA"
-
+                stringsAsFactors = F,
+                na.strings = "")
 
 
 Fact$Orgs =
@@ -269,7 +265,7 @@ allOrgs = allOrgs %>% select(ISO_3166_2,
                              org_member)
 
 
-allOrgs[allOrgs == ""] <- NA
+allOrgs[is.na(allOrgs)] <-  ""
 
 write.csv(allOrgs, "outputs/CountrycodesOrgs.csv", row.names = FALSE)
 write.csv(
@@ -282,22 +278,16 @@ rm(list = ls())
 #F. JSON----
 #Import ISO relationship
 ISOfull = read.csv("outputs/CountryCodes.csv",
-                   stringsAsFactors = F)
-#Fix Namibia
-ISOfull$ISO_3166_2=ifelse(ISOfull$ISO_3166_3=="NAM",
-                          "NA",
-                          ISOfull$ISO_3166_2)
+                   stringsAsFactors = F,
+                   na.strings = "")
 
 ISOs = ISOfull %>% select(ISO_3166_2, ISO_3166_3) %>% arrange(ISO_3166_2) %>% 
   filter(!is.na(ISO_3166_2))
 
 allOrgs=read.csv("outputs/CountrycodesOrgs.csv",
-                 stringsAsFactors = F)
-                             
-#Fix Namibia
-allOrgs$ISO_3166_2=ifelse(allOrgs$ISO_3166_3=="NAM",
-                          "NA",
-                          allOrgs$ISO_3166_2)
+                 stringsAsFactors = F,
+                 na.strings = "")
+
                              
 OrgFull = allOrgs %>% distinct(org_id) %>% arrange(org_id)
 
