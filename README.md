@@ -8,12 +8,12 @@ Complete database of countries and territories, their different country codes un
 * [C. Full json file](#jcodes)
 * [D. Data sources](#data)
 
-### Databases
+**Databases**
 Three different files are provided:
 
 
 
-#### A. Country Codes `.csv`  <a name="ccodes"></a>
+### A. Country Codes `.csv`  <a name="ccodes"></a>
 
 Main [`.csv` file](outputs/Countrycodes.csv) containing 
 * Country and regional codes
@@ -48,7 +48,7 @@ ISO_3166_3.sov|Sovereign code |Wikipedia, Statoids | If non-independent
 
 
 
-#### B. International Organizations `.csv`  <a name="ocodes"></a>
+### B. International Organizations `.csv`  <a name="ocodes"></a>
 
 A single [`.csv` file](outputs/CountrycodesOrgs.csv) describing the membership status of each country across 186 international organizations.
 Field | Description
@@ -63,7 +63,7 @@ org_member | Membership status
 
 
 
-#### C. Full json file `.json`  <a name="jcodes"></a>
+### C. Full json file `.json`  <a name="jcodes"></a>
 This [`.json` file](outputs/Countrycodesfull.json) combines the previous files:
 
 **Example**
@@ -122,7 +122,7 @@ ISO_memcol = function(df, #Input dataframe
   return(df2)
 }
 ```
-#### D. Data sources  <a name="data"></a>
+### D. Data sources  <a name="data"></a>
 * Wikipedia, the free encyclopedia
   * https://en.wikipedia.org/wiki/ISO_3166-1
   * https://es.wikipedia.org/wiki/Nomenclatura_de_las_Unidades_Territoriales_Estad%C3%ADsticas
