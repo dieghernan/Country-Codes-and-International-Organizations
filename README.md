@@ -9,9 +9,7 @@ Complete database of countries and territories, their different country codes un
 * [D. Data sources](#data)
 
 **Databases**
-Three different files are provided:
-
-
+<sup>*Note that blanks are noted as "" since ISO-3166-ALPHA 2 is NA*</sup>
 
 ### A. Country Codes `.csv`  <a name="ccodes"></a>
 
