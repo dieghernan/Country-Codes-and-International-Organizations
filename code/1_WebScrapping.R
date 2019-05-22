@@ -1,6 +1,7 @@
 #0. Cleaning and set-up R----
 rm(list = ls())
-XXXXX = "dieghernan"
+source("./code/pass.R")
+XXXXX = GEONAMES_USER
 library(pacman)
 p_load(dplyr,
        rvest,

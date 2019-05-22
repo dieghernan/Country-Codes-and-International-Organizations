@@ -305,7 +305,7 @@ Clean$NAME.ES = coalesce(Base_code$name.es.uc,
                          Base_code$name.es.gn,
                          Base_code$name.es.un,
                          Clean$NAME.EN)
-Clean$CONTINENT.ES = Base_code$continentname.en.gn
+Clean$CONTINENT.ES = Base_code$continentname.es.gn
 Clean$REGION.ES = coalesce(Base_code$regionname.es.uc,
                            Base_code$regionname.es.un)
 Clean$INTERREGION.ES = coalesce(Base_code$interregionname.es.uc,

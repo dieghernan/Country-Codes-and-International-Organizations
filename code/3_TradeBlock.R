@@ -7,7 +7,7 @@ p_load(dplyr,
        stringr,
        fuzzyjoin)
 #Import ISO relationship
-ISOfull = read.csv("outputs/CountryCodes.csv",
+ISOfull = read.csv("outputs/Countrycodes.csv",
                    stringsAsFactors = F,
                    na.strings = "")
 
@@ -277,7 +277,7 @@ rm(list = ls())
 
 #F. JSON----
 #Import ISO relationship
-ISOfull = read.csv("outputs/CountryCodes.csv",
+ISOfull = read.csv("outputs/Countrycodes.csv",
                    stringsAsFactors = F,
                    na.strings = "")
 
@@ -333,5 +333,8 @@ ISO_memcol = function(df, orgtosearch) {
   return(df2)
 }
 
-#ISOfull = fromJSON("outputs/Countrycodesfull.json")
-#ISO_extract = ISO_memcol(ISOfull, "EU")
+ISOfull = fromJSON("outputs/Countrycodesfull.json")
+ISO_extract = ISO_memcol(ISOfull, "EU")
+ISO_extract %>% select(NAME.EN, EU) %>% filter(!is.na(EU)) %>% head()
+
+
