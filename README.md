@@ -8,6 +8,8 @@ Complete database of countries and territories, their different country codes un
 * [C. Full json file](#jcodes)
 * [D. Data sources](#data)
 
+#### [vignette: Using Country Codes](https://dieghernan.github.io/201904_Using-CountryCodes/)
+
 **Databases**
 
 <sup>*Note that blanks are noted as "" since ISO-3166-ALPHA 2 is* NA.</sup>
