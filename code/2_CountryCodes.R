@@ -71,7 +71,6 @@ UN_end = left_join(
 )
 rm(UN, UN_ES)
 Base_code = full_join(Base_code, UN_end, by = "ISO_3166_3")
-Base_code = Base_code[!is.na(Base_code$ISO_3166_3), ]
 Base_code[Base_code == ""] <- NA
 
 #Add NUTS
@@ -87,6 +86,7 @@ NUTS_code$ISO_3166_2 = ifelse(NUTS_code$NUTS == "EL",
                               ifelse(NUTS_code$NUTS == "UK", "GB", NUTS_code$NUTS))
 NUTS_code = NUTS_code[, -2]
 Base_code = full_join(Base_code, NUTS_code, by = "ISO_3166_2")
+
 #Add CIA Factbook
 CIA =  read_html("files/fact_codes.html")  %>%
   html_nodes(xpath = '//*[@id="wfb-text-holder"]/div[2]/section/div[5]/table') %>%
@@ -112,7 +112,26 @@ CIA = CIA %>% select(
 #Change Gaza
 CIA[grep("GZ",CIA$FIPS_GEC),1:3] <- NA
 
-Base_code = full_join(Base_code, CIA)
+#Clean reps
+vectrep=grep("ISO includes with",CIA$COMMENTFACT)
+CIA$ISO_3166_2[vectrep]<-NA
+CIAbase<-CIA
+CIA<-CIA[!is.na(CIA$FIPS_GEC) | CIA$ISO_3166_3 == "XKX",]
+CIA<-unique(CIA)
+CIA$CIAind<-1:nrow(CIA)
+
+
+Base_code = full_join(Base_code, CIA[!is.na(CIA$ISO_3166_2),])
+
+
+c <-Base_code %>%  group_by(CIAind) %>% summarise(count=n()) %>% arrange(desc(count))
+
+CIALeft=CIA[!CIA$CIAind %in% Base_code$CIAind,]
+CIALeft<-unique(CIALeft)
+CIALeft<-CIALeft[!is.na(CIALeft$FIPS_GEC),]
+Base_code=bind_rows(Base_code,CIALeft)
+
+
 
 #Add geonames
 geonames = fromJSON("files/geocountries.json")
@@ -332,7 +351,6 @@ rm(df)
 
 Clean[is.na(Clean)]<-""
 
-
 write.csv(Clean, "outputs/Countrycodes.csv", row.names = FALSE)
 write.csv(Clean,
           paste("outputs/bk/Countrycodes_", Sys.Date(), ".csv", sep = ""),
@@ -346,12 +364,16 @@ Orgs =  read_html("files/fact.html")  %>%
   html_table() %>%
   as.data.frame(stringsAsFactors = F,
                 fix.empty.names = T)
-ccodes = left_join(Orgs, CIA, by = c("Country" = "NAMEFACT"))
+ccodes = left_join(Orgs, CIAbase, by = c("Country" = "NAMEFACT"))
 left = ccodes %>% filter(is.na(ISO_3166_2) &
                            Country != "European Union")
 n = CIA[grep("South Georgia", CIA$NAMEFACT), ]
 n$NAMEFACT = left$Country
-left = left[, 1:2] %>% left_join(n, by = c("Country" = "NAMEFACT"))
+left = left[, 1:2] %>% left_join(n, by = c("Country" = "NAMEFACT"))  %>% select(-CIAind)
+
+names(ccodes)
+names(left)
+
 FINCIA = rbind(ccodes %>% filter(!is.na(ISO_3166_2)),
                left)
 FINCIA = FINCIA %>% select(NAME = Country,

@@ -334,7 +334,7 @@ ISO_memcol = function(df, orgtosearch) {
 }
 
 ISOfull = fromJSON("outputs/Countrycodesfull.json")
-ISO_extract = ISO_memcol(ISOfull, "EU")
-ISO_extract %>% select(NAME.EN, EU) %>% filter(!is.na(EU)) %>% head()
+ISO_extract = ISO_memcol(ISOfull, "NATO")
+ISO_extract %>% select(NAME.EN, NATO) %>% filter(!is.na(NATO)) %>% head()
 
 

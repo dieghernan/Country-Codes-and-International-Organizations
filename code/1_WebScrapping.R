@@ -37,7 +37,7 @@ download.file(url, "files/geocountries_esp.json")
 url = paste(
   "http://api.geonames.org/searchJSON?formatted=true&username=",
   XXXXX,
-  "&style=full&fcode=ZN"
+  "&style=full&fcode=ZN", sep=""
 )
 download.file(url, "files/geoorgs.json")
 

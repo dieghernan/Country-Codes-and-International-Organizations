@@ -1,5 +1,9 @@
 # Country Codes and International Organizations & Groups
 
+**Last update: 29Jan2020**
+
+*Backups available on [`outputs/bk`](./outputs/bk)*
+
 Complete database of countries and territories, their different country codes under common standards (ISO-3166, GEC (Formerly FIPS ), M49 (UN), STANAG (NATO), NUTS, etc.) and their membership in different international organizations.
 
 
