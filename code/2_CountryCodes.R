@@ -136,6 +136,9 @@ Base_code=bind_rows(Base_code,CIALeft)
 #Add geonames
 geonames = fromJSON("files/geocountries.json")
 geonames = data.frame(geonames[["geonames"]])
+geonames$capital=ifelse(geonames$countryName=="Israel","Jerusalem",geonames$capital)
+
+
 geonames[geonames == ""] <- NA
 exclude = c("languages", "south", "north", "east", "west", "fipsCode")
 geonames = geonames[!colnames(geonames) %in% exclude]
@@ -383,6 +386,7 @@ FINCIA = FINCIA %>% select(NAME = Country,
                            STANAG,
                            Orgs = International.organization.participation)
 FINCIA[is.na(FINCIA)]<- ""
+
 
 write.csv(FINCIA, "outputs/bk/FactOrgs.csv", row.names = FALSE)
 
